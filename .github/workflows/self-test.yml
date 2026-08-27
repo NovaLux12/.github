@@ -1,0 +1,27 @@
+# Self-test for the shared reusable workflows.
+#
+# Runs the go-ci and python-ci reusable workflows against tiny sample modules
+# in this repo, proving the reusable definitions work before any repo adopts them.
+name: Self-test shared workflows
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/**'
+      - 'samples/**'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  go-ci-selftest:
+    uses: ./.github/workflows/go-ci.yml
+    with:
+      working-directory: samples/go-test-module
+
+  python-ci-selftest:
+    uses: ./.github/workflows/python-ci.yml
+    with:
+      working-directory: samples/py-test-module

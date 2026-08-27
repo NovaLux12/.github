@@ -1,0 +1,51 @@
+# Shared Python CI for NovaLux12 Python repos.
+#
+# Reusable workflow (workflow_call). Callers keep a 4-line .github/workflows/ci.yml:
+#
+#   jobs:
+#     ci:
+#       uses: NovaLux12/.github/.github/workflows/python-ci.yml@main
+#
+# Assumes a pip-installable package with pytest tests (fleet-standard shape).
+name: Python CI
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        description: Python version
+        required: false
+        type: string
+        default: '3.11'
+      working-directory:
+        description: Project directory (pass for non-root projects)
+        required: false
+        type: string
+        default: '.'
+      install:
+        description: Install command(s) before tests
+        required: false
+        type: string
+        default: |
+          pip install -e .
+          pip install pytest
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+      - name: install
+        run: ${{ inputs.install }}
+      - name: pytest
+        run: python -m pytest -q

@@ -1,0 +1,60 @@
+# Shared Go CI for NovaLux12 Go repos.
+#
+# Reusable workflow (workflow_call). Callers keep a 4-line .github/workflows/ci.yml:
+#
+#   jobs:
+#     ci:
+#       uses: NovaLux12/.github/.github/workflows/go-ci.yml@main
+#
+# Inputs allow overrides; defaults match the fleet-standard Go toolchain.
+name: Go CI
+
+on:
+  workflow_call:
+    inputs:
+      go-version:
+        description: Go toolchain version
+        required: false
+        type: string
+        default: '1.26'
+      working-directory:
+        description: Module directory (pass for non-root modules)
+        required: false
+        type: string
+        default: '.'
+      run-build:
+        description: Build the binary and smoke-test --help
+        required: false
+        type: boolean
+        default: true
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ inputs.go-version }}
+      - name: go vet
+        run: go vet ./...
+      - name: go test
+        run: go test ./...
+      - name: gofmt check
+        run: test -z "$(gofmt -l .)" || { echo "unformatted files:"; gofmt -l .; exit 1; }
+      - name: build + --help smoke test
+        if: ${{ inputs.run-build }}
+        run: |
+          go build -o /tmp/binary-under-test .
+          if /tmp/binary-under-test --help > /dev/null 2>&1 || [ $? -eq 2 ]; then
+            echo "--help smoke test OK"
+          else
+            echo "--help smoke test failed"; exit 1
+          fi

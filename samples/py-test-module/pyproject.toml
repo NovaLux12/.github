@@ -1,0 +1,5 @@
+[project]
+name = "shared-ci-selftest"
+version = "0.1.0"
+description = "Sample pip-installable module used to self-test the shared python-ci workflow"
+requires-python = ">=3.9"
