@@ -1,7 +1,11 @@
 # NovaLux12/.github
 
 Fleet-level GitHub config: shared reusable workflows for the NovaLux12 repos, so CI logic
-lives in exactly one place and per-repo callers stay 4 lines.
+lives in exactly one place and per-repo callers stay a handful of lines.
+
+The shortest real caller in this fleet is nine lines (`cron-doctor`, `fleet-pulse`,
+`b2-verify`): a trigger block, a `jobs:` key, and the one `uses:` line that
+points at the shared workflow.
 
 ## Reusable workflows
 
